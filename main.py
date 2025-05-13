@@ -53,35 +53,18 @@ def chatbot_full(nama, email, pertanyaan):
         jawaban = generate_response(pertanyaan)
     return jawaban
 
-# Fungsi untuk terminal CLI
-def chatbot_terminal():
-    print("🤖 Selamat datang di Leadgen Chatbot!")
-    while True:
-        user_input = input("Anda: ")
-        if user_input.lower() == "exit":
-            print("👋 Sampai jumpa!")
-            break
-        response = cari_jawaban(user_input)
-        if "Maaf" in response:
-            response = generate_response(user_input)
-        print("Bot:", response)
-
-# Main Launcher
+# Main Launcher otomatis tanpa input()
 def main():
-    mode = input("Ketik 'web' untuk mode Gradio atau tekan Enter untuk terminal: ").strip().lower()
-    if mode == "web":
-        with gr.Blocks() as demo:
-            gr.Markdown("## Leadgen Chatbot")
-            with gr.Row():
-                nama = gr.Textbox(label="Nama")
-                email = gr.Textbox(label="Email")
-            pertanyaan = gr.Textbox(label="Pertanyaan")
-            jawaban = gr.Textbox(label="Jawaban")
-            btn = gr.Button("Submit")
-            btn.click(fn=chatbot_full, inputs=[nama, email, pertanyaan], outputs=jawaban)
-        demo.launch()
-    else:
-        chatbot_terminal()
+    with gr.Blocks() as demo:
+        gr.Markdown("## Leadgen Chatbot")
+        with gr.Row():
+            nama = gr.Textbox(label="Nama")
+            email = gr.Textbox(label="Email")
+        pertanyaan = gr.Textbox(label="Pertanyaan")
+        jawaban = gr.Textbox(label="Jawaban")
+        btn = gr.Button("Submit")
+        btn.click(fn=chatbot_full, inputs=[nama, email, pertanyaan], outputs=jawaban)
+    demo.launch()
 
 if __name__ == "__main__":
     main()
