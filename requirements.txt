@@ -1,2 +1,4 @@
+flask
+gradio
 python-dotenv
 google-generativeai
