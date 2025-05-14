@@ -3,15 +3,12 @@ import csv
 import json
 import gradio as gr
 import google.generativeai as genai
-from dotenv import load_dotenv
 
-# Muat API Key dari file .env
-load_dotenv()
+# Ambil API Key dari ENV (bukan .env)
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    print("❌ API key tidak ditemukan di file .env!")
-    exit()
+    raise RuntimeError("❌ API key tidak ditemukan! Pastikan sudah diset di Hugging Face 'Repository secrets' dengan nama 'GEMINI_API_KEY'.")
 
 # Konfigurasi Gemini
 genai.configure(api_key=api_key)
@@ -41,11 +38,14 @@ def generate_response(prompt):
 
 # Fungsi: Simpan data ke leads.csv
 def simpan_lead(nama, email, pertanyaan):
-    with open("leads.csv", "a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow([nama, email, pertanyaan])
+    try:
+        with open("leads.csv", "a", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow([nama, email, pertanyaan])
+    except:
+        pass  # Jika gagal, diabaikan supaya tidak ganggu chatbot
 
-# Fungsi untuk Gradio: menyimpan lead & respon
+# Fungsi utama untuk Gradio
 def chatbot_full(nama, email, pertanyaan):
     simpan_lead(nama, email, pertanyaan)
     jawaban = cari_jawaban(pertanyaan)
@@ -53,18 +53,15 @@ def chatbot_full(nama, email, pertanyaan):
         jawaban = generate_response(pertanyaan)
     return jawaban
 
-# Main Launcher otomatis tanpa input()
-def main():
-    with gr.Blocks() as demo:
-        gr.Markdown("## Leadgen Chatbot")
-        with gr.Row():
-            nama = gr.Textbox(label="Nama")
-            email = gr.Textbox(label="Email")
-        pertanyaan = gr.Textbox(label="Pertanyaan")
-        jawaban = gr.Textbox(label="Jawaban")
-        btn = gr.Button("Submit")
-        btn.click(fn=chatbot_full, inputs=[nama, email, pertanyaan], outputs=jawaban)
-    demo.launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
+# Launch Gradio
+with gr.Blocks() as demo:
+    gr.Markdown("## 💬 Leadgen Chatbot")
+    with gr.Row():
+        nama = gr.Textbox(label="Nama")
+        email = gr.Textbox(label="Email")
+    pertanyaan = gr.Textbox(label="Pertanyaan")
+    jawaban = gr.Textbox(label="Jawaban")
+    btn = gr.Button("Submit")
+    btn.click(fn=chatbot_full, inputs=[nama, email, pertanyaan], outputs=jawaban)
 
-if __name__ == "__main__":
-    main()
+demo.launch()
