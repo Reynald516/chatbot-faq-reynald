@@ -1,40 +1,172 @@
 {
   "faq": [
     {
-      "question": "Apa saja jenis pakaian yang dijual?",
-      "answer": "Kami menjual baju wanita bergaya formal casual seperti blazer, blouse, kemeja, dan celana bahan berkualitas."
+      "question": ["chatbot itu apa", "apa itu chatbot", "pengertian chatbot"],
+      "answer": "Chatbot itu semacam asisten virtual yang bisa ngobrol sama kamu. Jadi, kalau ada yang tanya-tanya soal produk atau layananmu, chatbot bisa bantu jawab otomatis."
     },
     {
-      "question": "Apakah bisa cod?",
-      "answer": "Ya, kami melayani pembayaran COD untuk beberapa wilayah tertentu."
+      "question": ["fungsi", "manfaat", "kegunaan"],
+      "answer": "Fungsinya banyak! Mulai dari jawab pertanyaan pelanggan, bantu proses order, sampai kasih rekomendasi produk. Hemat waktu dan tenaga deh pokoknya."
     },
     {
-      "question": "Berapa lama pengiriman?",
-      "answer": "Pengiriman biasanya memakan waktu 2-4 hari kerja, tergantung lokasi Anda."
+      "question": ["cara kerja", "bagaimana bekerja"],
+      "answer": "Chatbot bekerja dengan cara mengenali kata-kata kunci dari pertanyaan pengguna, lalu mencocokkannya dengan jawaban yang sudah disiapkan sebelumnya."
     },
     {
-      "question": "Apakah bisa tukar barang?",
-      "answer": "Ya, Anda bisa menukar barang dalam waktu 3 hari setelah barang diterima dengan syarat label masih utuh."
+      "question": ["bisa di mana", "platform", "media sosial"],
+      "answer": "Bisa di banyak tempat! Website, WhatsApp, Instagram, bahkan Telegram. Tinggal pilih yang paling cocok buat bisnismu."
     },
     {
-      "question": "Apakah bahan bajunya adem?",
-      "answer": "Ya, bahan baju kami dipilih khusus agar nyaman, adem, dan cocok untuk aktivitas harian."
+      "question": ["harga", "biaya", "bayar"],
+      "answer": "Tenang, ada yang gratis kok! Tapi kalau mau fitur lebih lengkap, ada juga versi berbayar yang harganya terjangkau."
     },
     {
-      "question": "Apakah ada ukuran es?",
-      "answer": "Ukuran 'S', 'M', 'L', dan 'XL' tersedia untuk semua model baju. Silakan pilih sesuai kebutuhan Anda."
+      "question": ["bagaimana", "cara buat", "membuat", "bikin"],
+      "answer": "Gampang! Kamu tinggal siapkan daftar pertanyaan dan jawaban yang sering ditanyakan pelanggan. Nanti aku bantu setting chatbot-nya."
     },
     {
-      "question": "Apakah ada ukuran es untuk baju?",
-      "answer": "Ya, tersedia ukuran S, M, L, dan XL untuk semua jenis baju yang kami jual."
+      "question": ["ubah jawaban", "edit", "ganti"],
+      "answer": "Tentu bisa! Kapan saja kamu mau ubah atau tambah jawaban, tinggal edit aja. Fleksibel banget."
     },
     {
-      "question": "Ukuran baju tersedia apa saja?",
-      "answer": "Ukuran baju tersedia dari S hingga XL. Detail ukuran dapat dilihat di deskripsi produk."
+      "question": ["bisa bahasa lain", "multibahasa", "inggris"],
+      "answer": "Bisa dong! Chatbot-nya bisa disetting untuk pakai bahasa Indonesia, Inggris, atau bahasa lain sesuai kebutuhan."
     },
     {
-      "question": "Apakah ada ukuran besar?",
-      "answer": "Saat ini kami menyediakan ukuran hingga XL. Untuk ukuran lebih besar bisa kami bantu pre-order."
+      "question": ["aman", "keamanan", "privasi"],
+      "answer": "Aman kok! Data pelanggan dijaga dengan baik, dan chatbot-nya nggak akan share informasi tanpa izin."
+    },
+    {
+      "question": ["bisa jualan", "order", "transaksi"],
+      "answer": "Bisa banget! Chatbot bisa bantu proses order, kasih info produk, bahkan sampai ke pembayaran."
+    },
+    {
+      "question": ["bisa sapa nama", "personal", "menyapa"],
+      "answer": "Iya, chatbot-nya bisa disetting untuk menyapa pelanggan dengan nama mereka. Jadi lebih personal dan akrab."
+    },
+    {
+      "question": ["bisa belajar sendiri", "AI", "pintar"],
+      "answer": "Versi dasar belum bisa belajar sendiri. Tapi kalau kamu mau, ada versi AI yang bisa terus belajar dari interaksi dengan pelanggan."
+    },
+    {
+      "question": ["butuh tim", "harus bisa coding"],
+      "answer": "Nggak perlu! Kamu bisa jalankan chatbot ini sendiri tanpa harus bisa coding atau punya tim IT."
+    },
+    {
+      "question": ["contoh", "demo", "lihat"],
+      "answer": "Mau lihat contoh chatbot-nya? Aku bisa kasih demo biar kamu bisa coba langsung."
+    },
+    {
+      "question": ["berapa lama", "waktu pembuatan"],
+      "answer": "Cepat kok! Biasanya dalam 1-2 hari kerja, chatbot-nya sudah siap digunakan."
+    },
+    {
+      "question": ["bisa diubah tampilan", "custom", "desain"],
+      "answer": "Bisa banget! Tampilan chatbot bisa disesuaikan dengan branding bisnismu, mulai dari warna sampai gaya bahasa."
+    },
+    {
+      "question": ["bisa integrasi", "terhubung", "API"],
+      "answer": "Ya, chatbot ini bisa diintegrasikan dengan berbagai platform melalui API. Jadi, bisa terhubung dengan sistem lain yang kamu gunakan."
+    },
+    {
+      "question": ["bisa analisa", "laporan", "statistik"],
+      "answer": "Tentu! Chatbot-nya bisa kasih laporan interaksi, pertanyaan yang sering ditanyakan, dan data lainnya untuk bantu kamu analisa."
+    },
+    {
+      "question": ["bisa bantu promosi", "marketing", "iklan"],
+      "answer": "Bisa dong! Chatbot bisa bantu promosi produk baru, kasih info diskon, atau ajak pelanggan ikut event."
+    },
+    {
+      "question": ["bisa bantu edukasi", "belajar", "materi"],
+      "answer": "Iya, chatbot juga bisa digunakan untuk edukasi. Misalnya, kasih materi belajar, kuis, atau info penting lainnya."
+    },
+    {
+      "question": ["bisa bantu konsultasi", "tanya jawab", "diskusi"],
+      "answer": "Bisa! Chatbot bisa bantu konsultasi awal dengan pelanggan sebelum mereka lanjut ke tim kamu."
+    },
+    {
+      "question": ["bisa digunakan UMKM", "usaha kecil", "bisnis kecil"],
+      "answer": "Sangat cocok! Chatbot ini dirancang untuk membantu UMKM dalam melayani pelanggan dengan lebih efisien."
+    },
+    {
+      "question": ["bisa digunakan perusahaan besar", "korporat", "enterprise"],
+      "answer": "Tentu saja! Chatbot ini skalabel dan bisa digunakan oleh perusahaan besar dengan kebutuhan yang kompleks."
+    },
+    {
+      "question": ["bisa digunakan di pendidikan", "sekolah", "kampus"],
+      "answer": "Iya, chatbot juga bisa digunakan di dunia pendidikan untuk bantu komunikasi antara siswa, guru, dan orang tua."
+    },
+    {
+      "question": ["bisa digunakan di pemerintahan", "instansi", "layanan publik"],
+      "answer": "Bisa! Chatbot bisa membantu instansi pemerintah dalam memberikan layanan publik yang cepat dan efisien."
+    },
+    {
+      "question": ["bisa digunakan di kesehatan", "klinik", "rumah sakit"],
+      "answer": "Ya, chatbot bisa membantu di sektor kesehatan, misalnya untuk pendaftaran pasien, info jadwal dokter, dan lainnya."
+    },
+    {
+      "question": ["bisa digunakan di e-commerce", "toko online", "marketplace"],
+      "answer": "Tentu! Chatbot bisa membantu toko online dalam melayani pelanggan, menjawab pertanyaan, dan proses order."
+    },
+    {
+      "question": ["bisa digunakan di restoran", "cafe", "kuliner"],
+      "answer": "Bisa banget! Chatbot bisa bantu pelanggan pesan makanan, info menu, atau reservasi tempat."
+    },
+    {
+      "question": ["bisa digunakan di travel", "wisata", "perjalanan"],
+      "answer": "Iya, chatbot bisa bantu pelanggan cari info paket wisata, jadwal perjalanan, atau booking tiket."
+    },
+    {
+      "question": ["bisa digunakan di event", "acara", "seminar"],
+      "answer": "Bisa! Chatbot bisa bantu info jadwal acara, registrasi peserta, atau kirim pengingat sebelum acara dimulai."
+    },
+    {
+      "question": ["bisa digunakan di properti", "rumah", "apartemen"],
+      "answer": "Ya, chatbot bisa bantu calon pembeli atau penyewa cari info properti, jadwal viewing, atau tanya harga."
+    },
+    {
+      "question": ["bisa digunakan di otomotif", "mobil", "motor"],
+      "answer": "Bisa! Chatbot bisa bantu info spesifikasi kendaraan, jadwal test drive, atau promo terbaru."
+    },
+    {
+      "question": ["bisa digunakan di fashion", "pakaian", "baju"],
+      "answer": "Tentu! Chatbot bisa bantu pelanggan cari ukuran, warna, atau rekomendasi outfit."
+    },
+    {
+      "question": ["bisa digunakan di kecantikan", "skincare", "kosmetik"],
+      "answer": "Bisa banget! Chatbot bisa bantu rekomendasi produk, info cara pakai, atau jadwal konsultasi."
+    },
+    {
+      "question": ["bisa digunakan di olahraga", "fitness", "gym"],
+      "answer": "Iya, chatbot bisa bantu info jadwal kelas, paket membership, atau tips latihan."
+    },
+    {
+      "question": ["bisa digunakan di hiburan", "film", "musik"],
+      "answer": "Bisa! Chatbot bisa bantu info jadwal tayang, rekomendasi film atau lagu, dan beli tiket."
+    },
+    {
+      "question": ["bisa digunakan di teknologi", "gadget", "elektronik"],
+      "answer": "Tentu! Chatbot bisa bantu info spesifikasi produk, harga, atau promo terbaru."
+    },
+    {
+      "question": ["bisa digunakan di keuangan", "bank", "asuransi"],
+      "answer": "Ya, chatbot bisa bantu info produk keuangan, simulasi kredit, atau klaim asuransi."
+    },
+    {
+      "question": ["bisa digunakan di logistik", "pengiriman", "kurir"],
+      "answer": "Bisa! Chatbot bisa bantu tracking paket, info ongkir, atau jadwal pengiriman."
+    },
+    {
+      "question": ["bisa digunakan di pertanian", "petani", "agribisnis"],
+      "answer": "Iya, chatbot bisa bantu info harga pasar, tips pertanian, atau jadwal tanam."
+    },
+    {
+      "question": ["bisa digunakan di perikanan", "nelayan", "ikan"],
+      "answer": "Bisa! Chatbot bisa bantu info harga ikan, cuaca laut, atau tips budidaya."
+    },
+    {
+      "question": ["bisa digunakan di peternakan", "ternak", "hewan"],
+      "answer": "Ya, chatbot bisa bantu info pakan, jadwal vaksin, atau tips beternak."
     }
   ]
 }
