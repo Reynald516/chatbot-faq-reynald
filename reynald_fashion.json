@@ -1,0 +1,14 @@
+{
+  "intents": [
+    {
+      "tag": "salam",
+      "patterns": ["halo", "hai", "hello"],
+      "responses": ["Hai, selamat datang di Reynald Fashion! Ada yang bisa kami bantu?"]
+    },
+    {
+      "tag": "beli_dress",
+      "patterns": ["mau beli dress", "ada dress?", "pengen dress"],
+      "responses": ["Kami punya banyak koleksi dress terbaru! Mau yang model seperti apa?"]
+    }
+  ]
+}
