@@ -1,17 +1,27 @@
-import json
 import os
 import csv
+import json
 import random
-from difflib import SequenceMatcher
-from rapidfuzz import fuzz, process
-import gradio as gr
 import spacy
-import sqlite3
-import setup_database
-from huggingface_hub import InferenceClient
+import gradio as gr
 from datetime import datetime
+from rapidfuzz import fuzz, process
+import google.generativeai as genai
+from dotenv import load_dotenv
 
-# Load spaCy model
+load_dotenv()
+
+# Ambil API Key dari ENV (bukan .env)
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    raise RuntimeError("❌ API key tidak ditemukan! Pastikan sudah diset di Hugging Face 'Repository secrets' dengan nama 'GEMINI_API_KEY'.")
+
+# Konfigurasi Gemini
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+
+# Load NLP spaCy model
 try:
     nlp = spacy.load("en_core_web_sm")
 except (OSError, IOError):
@@ -19,59 +29,14 @@ except (OSError, IOError):
     subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
     nlp = spacy.load("en_core_web_sm")
 
-# Buat client HuggingFace dengan model LLaMA 3
-client = InferenceClient(model="meta-llama/Meta-Llama-3-8B-Instruct")
-
-# Load intent & data
-with open("intents.json", "r", encoding="utf-8") as f:
-    intents = json.load(f)
-
+# Data FAQ yang bisa dijawab chatbot
 with open("data.json", "r", encoding="utf-8") as f:
-    data = json.load(f)
+    data_main = json.load(f)
 
-def get_response(user_input):
-    user_input_lower = user_input.lower()
+with open("intents.json", "r", encoding="utf-8") as f:
+    default_intents_file = json.load(f)
 
-
-    # 1. Cek intents.json
-    for intent in intents["intents"]:
-        for pattern in intent["patterns"]:
-            if pattern.lower() in user_input_lower:
-                return random.choice(intent["responses"])
-
-    # 2. Cek data.json
-    for key in data:
-        if key.lower() in user_input_lower:
-            return data[key]
-
-    # 3. Cek niat memesan → Simpan leads
-    if "pesan" in user_input_lower or "order" in user_input_lower or "beli" in user_input_lower:
-        return "Boleh minta nomor WhatsApp Anda agar tim kami bisa bantu lebih lanjut?"
-
-    # 4. Fallback + Simpan ke unknown_questions.csv
-    save_unknown_question(user_input)
-    return "Maaf, saya belum memahami pertanyaan Anda. Pertanyaan ini akan kami simpan untuk pengembangan ke depannya."
-
-def save_unknown_question(question):
-    with open("unknown_questions.csv", "a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow([question, str(datetime.now())])
-
-def save_leads(name, contact):
-    with open("leads.csv", "a", newline="", encoding="utf-8") as file:
-        writer = csv.writer(file)
-        writer.writerow([name, contact, str(datetime.datetime.now())])
-    return "Terima kasih! Kontak Anda telah kami simpan dan akan segera dihubungi oleh tim kami."
-
-def lihat_data_csv():
-    with open("leads.csv", "r", encoding="utf-8")as f:
-        print("=== ISI leads.csv ===")
-        print(f.read())
-
-print("=====================")
-
-lihat_data_csv()
-
+#LOAD DATA
 # Fungsi untuk load FAQ dari file JSON
 def load_faq_data():
     try:
@@ -85,18 +50,87 @@ def load_faq_data():
 
 faq_data = load_faq_data()
 
-# Fungsi untuk load intents dari file intents.json
-def load_intents_data():
+def load_intents_by_toko(nama_toko=None):
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        file_path = os.path.join(base_dir, "intents.json")
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data["intents"]
-    except Exception as e:
-        raise RuntimeError(f"❌ Gagal memuat intents: {e}")
+        default_path = os.path.join(base_dir, "intents.json")
 
-intents_data = load_intents_data()
+        # Load default intents (ini yang sama kayak load_intents_data)
+        default_intents = []
+        if os.path.exists(default_path):
+            with open(default_path, "r", encoding="utf-8") as f:
+                default_intents = json.load(f)["intents"]
+                print(f"✅ Loaded default intents: {len(default_intents)}")
+        else:
+            print(f"⚠ File {default_path} tidak ditemukan.")
+
+        # Load toko intents (opsional)
+        toko_intents = []
+        if nama_toko:
+            toko_path = os.path.join(base_dir, "data", f"{nama_toko}.json")
+            if os.path.exists(toko_path):
+                with open(toko_path, "r", encoding="utf-8") as f:
+                    toko_intents = json.load(f)["intents"]
+                    print(f"✅ Loaded {nama_toko} intents: {len(toko_intents)}")
+            else:
+                print(f"⚠ File {toko_path} tidak ditemukan.")
+
+        # Gabungkan default intents + toko intents
+        semua_intents = default_intents + toko_intents
+        print(f"📦 Total intents loaded: {len(semua_intents)}")
+        return {"intents": semua_intents}
+
+    except Exception as e:
+        print(f"❌ Gagal memuat intents: {e}")
+        return {"intents": []}
+
+intents = load_intents_by_toko()
+
+# INTENT & JAWABAN
+# Untuk merespon input
+def get_response(user_input, toko="reynald_fashion"):
+    user_input_lower = user_input.lower()
+    intents = load_intents_by_toko(toko)
+    
+    # 1. Cek intent dari intents utama + reynald_fashion
+    for intent in intents["intents"]:
+        for pattern in intent["patterns"]:
+            if pattern.lower() in user_input_lower:
+                return random.choice(intent["responses"])
+
+                
+    # 2. Cek data.json
+    for key in data_main:
+        if key.lower() in user_input_lower:
+            return data_main[key]
+
+
+    # 3. Cek niat memesan → Simpan leads
+    if "pesan" in user_input_lower or "order" in user_input_lower or "beli" in user_input_lower:
+        return "Boleh minta nomor WhatsApp Anda agar tim kami bisa bantu lebih lanjut?"
+
+    # 4. Fallback + Simpan ke unknown_questions.csv
+    save_unknown_question(user_input)
+    return "Maaf, saya belum memahami pertanyaan Anda. Pertanyaan ini akan kami simpan untuk pengembangan ke depannya."
+
+# Cek pattren dengan fuzzy seacrh
+def prediksi_intent(pesan, intents_data):
+    pesan = pesan.lower()
+    best_score = 0
+    best_intent = None
+
+    for intent in intents_data["intents"]:
+        for pattern in intent["patterns"]:
+            pattern_lower = pattern.lower()
+            score = fuzz.token_sort_ratio(pesan, pattern_lower)  # dari fuzzywuzzy
+            
+            if score > best_score:
+                best_score = score
+                best_intent = intent["tag"]
+
+    if best_score >= 60:
+        return best_intent
+    return None
 
 # Fungsi untuk mencari jawaban terdekat dari pertanyaan
 def cari_jawaban_terdekat(message, faq_data):
@@ -114,44 +148,20 @@ def cari_jawaban_terdekat(message, faq_data):
         return mapping_pertanyaan_ke_jawaban[pertanyaan_mirip]
 
     return None
-
-def similar(a, b):
-    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
-
-# Fungsi untuk memprediksi intent dari pesan
-def prediksi_intent(pesan, intents_data):
-    pesan = pesan.lower()
-    best_score = 0
-    best_intent = None
-    for intent in intents_data:
-        for pattern in intent["patterns"]:
-            score = similar(pesan, pattern)
-            if score > best_score:
-                best_score = score
-                best_intent = intent["tag"]
-    if best_score > 0.7:
-        return best_intent
-    return None
-
-# Simpan pertanyaan baru ke leads.csv
-def simpan_leads(nama, email, pertanyaan, entitas):
+# LEADS
+# Simpan pertanyaan+email+nama+entitas baru ke leads.csv
+def simpan_leads(nama, email, contact, pertanyaan, entitas_terdeteksi):
     if pertanyaan_sudah_ada(pertanyaan):
         print("✅ Pertanyaan sudah ada di leads, tidak disimpan ulang.")
         return # skip penyimpanan
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    entitas_str = ", ".join([f"{text}({label})"for text, label in entitas])
+    entitas_str = ", ".join([f"{text}({label})"for text, label in entitas_terdeteksi])
         
     with open("leads.csv", mode="a", encoding="utf-8", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow([nama, email, pertanyaan, timestamp, entitas_str, "belum dijawab"])
+        writer.writerow([nama, contact, email, pertanyaan, timestamp, entitas_str])
         print("✅ Pertanyaan baru disimpan ke leads.")
-
-# Deteksi entitas penting dari pesan
-def deteksi_entitas(pesan):
-    doc = nlp(pesan)
-    entitas = [(ent.text, ent.label_) for ent in doc.ents]
-    return entitas
 
 # Cek apakah pertanyaan sudah ada di leads.csv
 def pertanyaan_sudah_ada(pertanyaan):
@@ -165,45 +175,35 @@ def pertanyaan_sudah_ada(pertanyaan):
     except FileNotFoundError:
         return False
 
+# pakai SpaCy untuk Deteksi entitas penting dari pesan misalnya nama, produk, tempat, dll.
+def deteksi_entitas(pesan):
+    doc = nlp(pesan)
+    entitas = [(ent.text, ent.label_) for ent in doc.ents]
+    return entitas
 
-def simpan_pertanyaan(pertanyaan):
-    conn = sqlite3.connect('chatbot.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO pertanyaan_baru (pertanyaan) VALUES (?)
-    ''', (pertanyaan,))
-    conn.commit()
-    conn.close()
-
-def load_intents_by_toko(nama_toko):
-    try:
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        defaul_path = os.path.join(base_dir, "intents.json")
-        with open(defaul_path, "r", encoding="utf-8")as f:
-            defaul_intents = json.load(f)["intents"]
-
-        toko_path = os.path.join(base_dir, "data", f"{nama_toko}.json")
-        if os.path.exists(toko_path):
-            with open(toko_path, "r", encoding="utf-8") as f:
-                toko_intents = json.load(f)["intents"]
-        else:
-            toko_intents = []
-            
-        semua_intents = defaul_intents + toko_intents
-        return semua_intents
-        
-    except Exception as e:
-        print(f" Gagal memuat intents untuk toko{nama_toko}:{e}")
-        return []
-
+# FALLBACK & UNKNOWN
+# menyimpan pertanyaan yang tidak dikenali ke leads.csv
+def save_unknown_question(question):
+    with open("unknown_questions.csv", mode="a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), question])
 
 # Fallback messages yang lebih manusiawi dan elegan
 fallback_messages = [
     "Terima kasih sudah menghubungi Reynald Intelligence! Pertanyaan Anda sangat penting bagi kami. Kami akan segera membantu Anda dengan lebih detail. Sementara itu, apakah ada hal lain yang ingin Anda tanyakan?",
-    "Kami senang Anda menghubungi Reynald Fashion. Sepertinya kami perlu beberapa saat untuk menemukan jawaban yang tepat. Apakah Anda ingin admin kami membantu lebih lanjut?",
+    "Kami senang Anda menghubungi Reynald Intelligence. Sepertinya kami perlu beberapa saat untuk menemukan jawaban yang tepat. Apakah Anda ingin admin kami membantu lebih lanjut?",
     "Maaf, kami belum memiliki jawaban yang tepat. Tapi kami sangat menghargai pertanyaan Anda dan akan segera menghubungi Anda kembali.",
     "Pertanyaan Anda sungguh menarik! Saat ini admin kami sedang memeriksa jawaban terbaik untuk Anda. Sabar sebentar ya 😊"
 ]
+     
+# MODEL
+# Fungsi: Minta jawaban dari Gemini
+def generate_response(prompt):
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Terjadi kesalahan dari Gemini: {e}"
     
 
 # Fungsi utama chatbot
@@ -216,11 +216,14 @@ def respond(message, history, system_message, max_tokens, temperature, top_p, na
 
      # Cek intents data dinamis pilihan toko
     intents_data = load_intents_by_toko(toko)
+    print(f"🧠 Intents loaded: {len(intents_data['intents'])}")
     
     # Cek intent user
     intent_didapat = prediksi_intent(message, intents_data)
-    if intent_didapat:
-        for intent in intents_data:
+    print(f"🎯 Intent dikenali: {intent_didapat}")
+
+    if intent_didapat and intents_data["intents"]:
+        for intent in intents_data["intents"]:
             if intent["tag"] == intent_didapat:
                 response_intent = intent["responses"][0]  # Ambil salah satu response
                 yield response_intent
@@ -232,10 +235,7 @@ def respond(message, history, system_message, max_tokens, temperature, top_p, na
         return
     else:
         try:
-            simpan_leads(nama, email, message, entitas_terdeteksi)
-
-            simpan_pertanyaan(message)
-
+            simpan_leads(nama, email, contact="", pertanyaan=message, entitas_terdeteksi=entitas_terdeteksi)
             
         except Exception as e:
             print("Terjadi error saat menyimpan leads:", e)
@@ -257,48 +257,28 @@ def respond(message, history, system_message, max_tokens, temperature, top_p, na
 
         # Panggil model LLM dari Hugging Face
         response = ""
-        try:
-            msg = client.chat_completion(
-                messages,
-                max_tokens=max_tokens,
-                temperature=temperature,
-                top_p=top_p,
-            )
-            print("DEBUG msg:", msg)
-            print("DEBUG type:", type(msg))
-            
-            response_text = msg.choices[0].message.content
-            if response_text:
-                response = response_text.strip()
-                yield response
-            else:
-                save_unknown_question(message)
-                yield fallback_message
-                # Lanjutkan kalau formatnya benar
-        except Exception as e:
-            print(f"❌ Error API: {e}")
-            save_unknown_question(message)
-            yield "Maaf, terjadi kesalahan. Coba lagi nanti."
+        
+        prompt_final = "\n".join([msg["content"] for msg in messages])
+        response_text = generate_response(prompt_final)
+        yield response_text
 
-        # Tambahkan fallback jika response kosong
-        if response is None or not response.strip():
-            save_unknown_question(message)
-            yield random.choice(fallback_messages)
+        if response_text.startswith("Terjadi kesalahan dari Gemini:"):
+            response_text = random.choice(fallback_messages)
 
+        yield response_text
+        return
+    
 # Gradio interface
 demo = gr.ChatInterface(
     respond,
     additional_inputs=[
         gr.Textbox(label="Nama", value="Reynald"),
         gr.Textbox(label="Email", value="reynaldintelligence@gmail.com"),
-        gr.Dropdown(label="Pilih Toko", choices=["reynald_fashion", "toko_sepatu"], value="reynald_fashion"),
-        gr.Textbox(
-            value="Kamu adalah chatbot butik fashion cewek bernama Reynald Fashion. Gaya bicaramu sopan, ramah, hangat, dan modis seperti beauty advisor di butik high class. Jawabanmu harus membantu, meyakinkan, dan tetap elegan.",
-            label="System message"
-        ),
-        gr.Slider(1, 2048, value=512, step=1, label="Max new tokens"),
-        gr.Slider(0.1, 4.0, value=0.7, step=0.1, label="Temperature"),
-        gr.Slider(0.1, 1.0, value=0.95, step=0.05, label="Top-p"),
+        gr.Textbox(label="System Message", value="Kamu adalah asisten toko baju profesional."),
+        gr.Dropdown(label="Nama Toko", choices=["reynald_fashion", "toko_sepatu"], value="reynald_fashion"),
+        gr.Slider(label="Max Tokens", minimum=100, maximum=2048, value=512),
+        gr.Slider(label="Temperature", minimum=0, maximum=1, value=0.7),
+        gr.Slider(label="Top P", minimum=0, maximum=1, value=0.95)
     ],
     title="💬 Reynald Chatbot",
     description="Tanyakan apa pun tentang toko anda dengan bantuan Reynald intelligence. Kami siap membantu Anda dengan pelayanan terbaik.",
